@@ -38,7 +38,7 @@ dependencies {
 }
 
 rewrite {
-    activeRecipe("org.openrewrite.starter.PlainTaskPropertyToProviderApiRecipe")
+    activeRecipe("org.openrewrite.starter.MigrateToProviderApiRecipe")
 }
 ```
 

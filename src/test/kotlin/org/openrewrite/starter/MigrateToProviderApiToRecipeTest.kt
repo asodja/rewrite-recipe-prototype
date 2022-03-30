@@ -20,7 +20,7 @@ import org.openrewrite.Recipe
 import org.openrewrite.java.JavaParser
 import org.openrewrite.java.JavaRecipeTest
 
-class PlainTaskPropertyToProviderApiRecipeTest: JavaRecipeTest {
+class MigrateToProviderApiToRecipeTest: JavaRecipeTest {
     override val parser: JavaParser
         get() = JavaParser.fromJavaVersion()
             .logCompilationWarningsAndErrors(true)
@@ -28,7 +28,7 @@ class PlainTaskPropertyToProviderApiRecipeTest: JavaRecipeTest {
             .build()
 
     override val recipe: Recipe
-        get() = PlainTaskPropertyToProviderApiRecipe()
+        get() = MigrateToProviderApiRecipe()
 
     @Test
     fun `replace input plain type with the Provider API`() = assertChanged(
@@ -53,15 +53,11 @@ import org.gradle.api.provider.Property;
 import org.gradle.api.tasks.Input;
 
 class TestTask {
-    private String property;
+    private final Property<String> property;
 
     @Input
     public Property<String> getProperty() {
         return property;
-    }
-
-    public void setProperty(String value) {
-        this.property = value;
     }
 }
         """
