@@ -17,36 +17,9 @@ Before you publish your recipe module to an artifact repository, you may want to
 To do this on the command line, run `./gradlew publishToMavenLocal` (or equivalently `./gradlew pTML`).
 This will publish to your local maven repository, typically under `~/.m2/repository`.
 
-Replace the groupId, artifactId, and recipe name in these samples with those you selected in the previous steps. 
+Replace the groupId, artifactId, and recipe name in these samples with those you selected in the previous steps.
 
-In a Maven project's pom.xml, make your recipe module a plugin dependency:
-```xml
-<project>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.openrewrite.maven</groupId>
-                <artifactId>rewrite-maven-plugin</artifactId>
-                <version>4.14.1</version>
-                <configuration>
-                    <activeRecipes>
-                        <recipe>org.openrewrite.starter.NoGuavaListsNewArrayList</recipe>
-                    </activeRecipes>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.openrewrite.recipe</groupId>
-                        <artifactId>rewrite-recipe-starter</artifactId>
-                        <version>0.1.0-SNAPSHOT</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-        </plugins>
-    </build>
-</project>
-```
-
-Unlike Maven, Gradle must be explicitly configured to resolve dependencies from maven local.
+Gradle must be explicitly configured to resolve dependencies from maven local.
 The root project of your gradle build, make your recipe module a dependency of the `rewrite` configuration:
 
 ```groovy
@@ -65,7 +38,7 @@ dependencies {
 }
 
 rewrite {
-    activeRecipe("org.openrewrite.starter.NoGuavaListsNewArrayList")
+    activeRecipe("org.openrewrite.starter.PlainTaskPropertyToProviderApiRecipe")
 }
 ```
 

@@ -42,11 +42,11 @@ configurations.all {
     }
 }
 
-val rewriteVersion = "latest.integration"
+val rewriteVersion = "7.20.0"
 
 dependencies {
-    compileOnly("org.projectlombok:lombok:latest.release")
-    annotationProcessor("org.projectlombok:lombok:latest.release")
+    compileOnly("org.projectlombok:lombok:1.18.22")
+    annotationProcessor("org.projectlombok:lombok:1.18.22")
 
     implementation("org.openrewrite:rewrite-java:${rewriteVersion}")
     runtimeOnly("org.openrewrite:rewrite-java-11:${rewriteVersion}")
@@ -54,12 +54,12 @@ dependencies {
     testImplementation("org.jetbrains.kotlin:kotlin-reflect")
     testImplementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 
-    testImplementation("org.junit.jupiter:junit-jupiter-api:latest.release")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:latest.release")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:latest.release")
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
 
     testImplementation("org.openrewrite:rewrite-test:${rewriteVersion}")
-    testImplementation("org.assertj:assertj-core:latest.release")
+    testImplementation("org.assertj:assertj-core:3.22.0")
 }
 
 tasks.named<Test>("test") {
