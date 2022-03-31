@@ -62,4 +62,39 @@ class TestTask {
 }
         """
     )
+
+    @Test
+    fun `replace setProperty with property$set invocations`() = assertChanged(
+        dependsOn = arrayOf(
+            """
+import org.gradle.api.provider.Property;
+import org.gradle.api.tasks.Input;
+
+class TestTask {
+    private final Property<String> property = null;
+
+    @Input
+    public Property<String> getProperty() {
+        return property;
+    }
+}
+    """
+        ),
+        before = """
+class TestPlugin {
+    public void apply() {
+        TestTask task = new TestTask();
+        task.setProperty("Demo value");
+    }
+}
+        """,
+        after = """
+class TestPlugin {
+    public void apply() {
+        TestTask task = new TestTask();
+        task.getProperty.set("Demo value");
+    }
+}
+        """
+    )
 }

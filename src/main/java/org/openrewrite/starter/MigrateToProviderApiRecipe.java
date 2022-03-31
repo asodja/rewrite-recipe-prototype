@@ -7,6 +7,7 @@ public class MigrateToProviderApiRecipe extends Recipe {
     public MigrateToProviderApiRecipe() {
         doNext(new CollectTaskPlainPropertiesRecipe());
         doNext(new MigrateTaskPropertiesToProviderApiRecipe());
+        doNext(new MigratePropertySetInvocationsRecipe());
     }
 
     @Override

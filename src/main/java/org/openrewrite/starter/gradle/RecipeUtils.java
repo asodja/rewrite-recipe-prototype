@@ -16,6 +16,11 @@ public class RecipeUtils {
         return method.getName().getSimpleName().startsWith("set");
     }
 
+    public static boolean isSetter(J.MethodInvocation method) {
+        // TODO check also types
+        return method.getName().getSimpleName().startsWith("set") && method.getArguments().size() == 1;
+    }
+
     public static boolean isVariableForPlainProperty(J.VariableDeclarations variableDeclarations) {
         return variableDeclarations.getType() != null && !variableDeclarations.getType().isAssignableFrom(PROPERTY_PATTERN);
     }
@@ -35,9 +40,12 @@ public class RecipeUtils {
     }
 
     public static String setterToField(J.MethodDeclaration method) {
-        String getterName = method.getSimpleName();
-        String property = getterName.replace("set", "");
+        String property = method.getSimpleName().replace("set", "");
         return property.substring(0, 1).toLowerCase() + property.substring(1);
+    }
+
+    public static String setterToGetter(J.MethodInvocation method) {
+        return method.getSimpleName().replace("set", "get");
     }
 
     public static J.Modifier newModifier(J.Modifier.Type type) {

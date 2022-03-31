@@ -1,5 +1,6 @@
 import nebula.plugin.contacts.Contact
 import nebula.plugin.contacts.ContactsExtension
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
 
 plugins {
     `java-library`
@@ -65,6 +66,9 @@ dependencies {
 tasks.named<Test>("test") {
     useJUnitPlatform()
     jvmArgs = listOf("-XX:+UnlockDiagnosticVMOptions", "-XX:+ShowHiddenFrames")
+    testLogging {
+        lifecycle.exceptionFormat = TestExceptionFormat.FULL
+    }
 }
 
 java {
