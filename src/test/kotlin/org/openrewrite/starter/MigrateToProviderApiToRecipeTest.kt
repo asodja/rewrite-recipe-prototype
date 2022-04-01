@@ -92,7 +92,7 @@ class TestPlugin {
 class TestPlugin {
     public void apply() {
         TestTask task = new TestTask();
-        task.getProperty.set("Demo value");
+        task.getProperty().set("Demo value");
     }
 }
         """
