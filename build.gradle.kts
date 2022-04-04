@@ -50,6 +50,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:1.18.22")
 
     implementation("org.openrewrite:rewrite-java:${rewriteVersion}")
+    implementation("org.openrewrite:rewrite-groovy:${rewriteVersion}")
     runtimeOnly("org.openrewrite:rewrite-java-11:${rewriteVersion}")
 
     testImplementation("org.jetbrains.kotlin:kotlin-reflect")
