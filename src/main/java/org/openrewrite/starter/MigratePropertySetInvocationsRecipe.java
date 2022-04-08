@@ -8,6 +8,7 @@ import org.openrewrite.java.JavaVisitor;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JContainer;
 import org.openrewrite.java.tree.JRightPadded;
+import org.openrewrite.java.tree.JavaSourceFile;
 import org.openrewrite.java.tree.JavaType;
 import org.openrewrite.java.tree.Space;
 import org.openrewrite.marker.Markers;
@@ -19,6 +20,14 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 public class MigratePropertySetInvocationsRecipe extends Recipe {
+
+    private enum FileType {
+        GROOVY,
+        JAVA
+    }
+
+    private static final String FILE_TYPE = "source-file-type";
+
     @Override
     public String getDisplayName() {
         return "Rewrite setter invocations for properties that were migrated to provider API";
@@ -27,10 +36,21 @@ public class MigratePropertySetInvocationsRecipe extends Recipe {
     @Override
     protected TreeVisitor<?, ExecutionContext> getVisitor() {
         return new JavaVisitor<ExecutionContext>() {
+
+            @Override
+            public J visitJavaSourceFile(JavaSourceFile cu, ExecutionContext executionContext) {
+                System.out.println(cu.getSourcePath());
+                FileType fileType = cu.getSourcePath().toString().endsWith(".groovy")
+                        ? FileType.GROOVY
+                        : FileType.JAVA;
+                executionContext.putMessage(FILE_TYPE, fileType);
+                return super.visitJavaSourceFile(cu, executionContext);
+            }
+
             @Override
             public J visitMethodInvocation(J.MethodInvocation method, ExecutionContext executionContext) {
                 method = (J.MethodInvocation) super.visitMethodInvocation(method, executionContext);
-                Optional<JavaType.Method> getterOptional = findPropertyGetterForSetter(method);
+                Optional<JavaType.Method> getterOptional = findPropertyGetterForSetter(method, executionContext);
                 if (getterOptional.isPresent()) {
                     // Create method call like `task.getProperty()`
                     J.MethodInvocation getPropertyCall = new J.MethodInvocation(
@@ -59,19 +79,29 @@ public class MigratePropertySetInvocationsRecipe extends Recipe {
                 return method;
             }
 
-            private Optional<JavaType.Method> findPropertyGetterForSetter(J.MethodInvocation method) {
+            private Optional<JavaType.Method> findPropertyGetterForSetter(J.MethodInvocation method, ExecutionContext executionContext) {
                 if (RecipeUtils.isSetter(method)
                         && method.getSelect() instanceof J.Identifier
                         && method.getSelect().getType() instanceof JavaType.FullyQualified) {
                     JavaType.FullyQualified type = (JavaType.FullyQualified) method.getSelect().getType();
                     String getterName = RecipeUtils.setterToGetter(method);
                     Pattern parameterType = maybeBoxPrimitive(method.getArguments().get(0).getType());
-                    return type.getMethods().stream()
+                    Optional<JavaType.Method> methodOptional = type.getMethods().stream()
                             .filter(m -> isPropertyGetterMatchingSetter(m, getterName, parameterType))
                             .findFirst();
-
+                    return executionContext.getMessage(FILE_TYPE) == FileType.GROOVY
+                        ? methodOptional.map(this::modifyMethodForGroovy)
+                        : methodOptional;
                 }
                 return Optional.empty();
+            }
+
+            /**
+             * For Groovy we do some modifications on the getter: for now instead of getProperty we use property,
+             * but in the future we could also define type if method is defined as "def getProperty()"
+             */
+            private JavaType.Method modifyMethodForGroovy(JavaType.Method method) {
+                return method.withName(RecipeUtils.getterToField(method.getName()));
             }
 
             private boolean isPropertyGetterMatchingSetter(JavaType.Method method, String expectedGetterName, Pattern parameterType) {

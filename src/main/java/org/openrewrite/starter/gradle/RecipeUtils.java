@@ -34,7 +34,10 @@ public class RecipeUtils {
     }
 
     public static String getterToField(J.MethodDeclaration method) {
-        String getterName = method.getSimpleName();
+        return getterToField(method.getSimpleName());
+    }
+
+    public static String getterToField(String getterName) {
         String property = getterName.replace("get", "").replace("is", "");
         return property.substring(0, 1).toLowerCase() + property.substring(1);
     }

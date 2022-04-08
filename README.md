@@ -1,3 +1,6 @@
+## Important
+Current version works with OpenRewrite 7.22.0-SNAPSHOT, so you need to build OpenRewrite locally with the latest master.
+
 ## Rewrite recipe starter
 
 This repository serves as a template for building your own recipe JARs and publishing them to a repository where they can be applied on [app.moderne.io](https://app.moderne.io) against all of the public OSS code that is included there.
