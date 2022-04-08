@@ -2,8 +2,11 @@ package org.openrewrite.starter.gradle;
 
 import org.openrewrite.Tree;
 import org.openrewrite.java.tree.J;
+import org.openrewrite.java.tree.JavaType;
 import org.openrewrite.java.tree.Space;
 import org.openrewrite.marker.Markers;
+
+import java.util.regex.Pattern;
 
 import static java.util.Collections.emptyList;
 import static org.openrewrite.starter.gradle.GradleConstants.INPUT_ANNOTATION_PATTERN;
@@ -59,5 +62,32 @@ public class RecipeUtils {
                 type,
                 emptyList()
         );
+    }
+
+    public static String getPrimitiveBoxedType(JavaType.Primitive primitive) {
+        switch (primitive.getKeyword()) {
+            case "boolean":
+                return Boolean.class.getName();
+            case "byte":
+                return Byte.class.getName();
+            case "char":
+                return Character.class.getName();
+            case "double":
+                return Double.class.getName();
+            case "float":
+                return Float.class.getName();
+            case "int":
+                return Integer.class.getName();
+            case "long":
+                return Long.class.getName();
+            case "short":
+                return Short.class.getName();
+            case "String":
+                return String.class.getName();
+            case "void":
+                return Void.class.getName();
+            default:
+                throw new UnsupportedOperationException("Can't wrap primitive type: " + primitive.getKeyword());
+        }
     }
 }

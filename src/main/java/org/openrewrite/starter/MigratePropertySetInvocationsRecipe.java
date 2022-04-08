@@ -39,7 +39,6 @@ public class MigratePropertySetInvocationsRecipe extends Recipe {
 
             @Override
             public J visitJavaSourceFile(JavaSourceFile cu, ExecutionContext executionContext) {
-                System.out.println(cu.getSourcePath());
                 FileType fileType = cu.getSourcePath().toString().endsWith(".groovy")
                         ? FileType.GROOVY
                         : FileType.JAVA;
@@ -113,29 +112,7 @@ public class MigratePropertySetInvocationsRecipe extends Recipe {
 
             private Pattern maybeBoxPrimitive(JavaType maybePrimitive) {
                 if (maybePrimitive instanceof JavaType.Primitive) {
-                    String keyword = ((JavaType.Primitive) maybePrimitive).getKeyword();
-                    switch (keyword) {
-                        case "boolean":
-                            return Pattern.compile("java.lang.Boolean");
-                        case "byte":
-                            return Pattern.compile("java.lang.Byte");
-                        case "char":
-                            return Pattern.compile("java.lang.Char");
-                        case "double":
-                            return Pattern.compile("java.lang.Double");
-                        case "float":
-                            return Pattern.compile("java.lang.Float");
-                        case "int":
-                            return Pattern.compile("java.lang.Integer");
-                        case "long":
-                            return Pattern.compile("java.lang.Long");
-                        case "short":
-                            return Pattern.compile("java.lang.Short");
-                        case "String":
-                            return Pattern.compile("java.lang.String");
-                        default:
-                            throw new UnsupportedOperationException("Can't wrap primitive type: " + keyword);
-                    }
+                    return Pattern.compile(RecipeUtils.getPrimitiveBoxedType((JavaType.Primitive) maybePrimitive));
                 }
                 if (maybePrimitive instanceof JavaType.FullyQualified) {
                     return Pattern.compile(((JavaType.FullyQualified) maybePrimitive).getFullyQualifiedName());

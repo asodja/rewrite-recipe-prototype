@@ -17,7 +17,9 @@ package org.openrewrite.starter;
 
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
+import org.openrewrite.Tree;
 import org.openrewrite.TreeVisitor;
+import org.openrewrite.groovy.GroovyVisitor;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.java.JavaVisitor;
 import org.openrewrite.java.tree.J;
@@ -32,7 +34,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.openrewrite.starter.gradle.GradleConstants.PROPERTIES_MESSAGE_PREFIX;
-import static org.openrewrite.starter.gradle.GradleConstants.PROPERTY_NAME;
+import static org.openrewrite.starter.gradle.GradleConstants.PROPERTY_FQ;
+import static org.openrewrite.starter.gradle.GradleConstants.PROPERTY_TYPE;
 import static org.openrewrite.starter.gradle.RecipeUtils.isVariableForPlainProperty;
 import static org.openrewrite.starter.gradle.RecipeUtils.newModifier;
 
@@ -76,15 +79,14 @@ public class MigrateTaskPropertiesToProviderApiRecipe extends Recipe {
                 J.VariableDeclarations.NamedVariable variable = variableDeclaration.getVariables().get(0);
                 if (isVariableForPlainProperty(variableDeclaration)
                         && executionContext.getMessage(getPropertiesMessageKey(), Collections.<String>emptySet()).contains(variable.getSimpleName())) {
-                    maybeAddImport(PROPERTY_NAME);
+                    maybeAddImport(PROPERTY_FQ);
                     // TODO add intialization:
                     // JLeftPadded.withElement(Space.build(" ", Collections.emptyList())), J.MethodInvocation..)
                     variable = variable
-                            .withType(JavaType.buildType(PROPERTY_NAME));
+                            .withType(PROPERTY_TYPE);
                     return variableDeclaration
-                            .withType(JavaType.buildType(PROPERTY_NAME))
-                            .withModifiers(maybeAddFinal(variableDeclaration.getModifiers()))
                             .withTypeExpression(toProperty(variableDeclaration.getTypeExpression()))
+                            .withModifiers(maybeAddFinal(variableDeclaration.getModifiers()))
                             .withVariables(Collections.singletonList(variable));
                 }
                 return statement;
@@ -103,7 +105,7 @@ public class MigrateTaskPropertiesToProviderApiRecipe extends Recipe {
             public J visitMethodDeclaration(J.MethodDeclaration method, ExecutionContext executionContext) {
                 method = (J.MethodDeclaration) super.visitMethodDeclaration(method, executionContext);
                 if (isGetterForPlainProperty(method, executionContext)) {
-                    maybeAddImport(PROPERTY_NAME);
+                    maybeAddImport(PROPERTY_FQ);
                     return method
                             .withMethodType(toProperty(method.getMethodType()))
                             .withReturnTypeExpression(toProperty(method.getReturnTypeExpression()));
@@ -128,7 +130,20 @@ public class MigrateTaskPropertiesToProviderApiRecipe extends Recipe {
                     J.Identifier identifier = ((J.Identifier) returnTypeExpression);
                     return identifier
                             .withSimpleName("Property<" + identifier.getSimpleName() + ">")
-                            .withType(JavaType.buildType(PROPERTY_NAME));
+                            .withType(PROPERTY_TYPE);
+                }
+                if (returnTypeExpression instanceof J.Primitive) {
+                    J.Primitive primitive = ((J.Primitive) returnTypeExpression);
+                    String boxedType = RecipeUtils.getPrimitiveBoxedType(primitive.getType()).replace("java.lang.", "");
+                    String simpleName = "Property<" + boxedType + ">";
+                    return new J.Identifier(
+                            Tree.randomId(),
+                            returnTypeExpression.getPrefix(),
+                            returnTypeExpression.getMarkers(),
+                            simpleName,
+                            JavaType.buildType(PROPERTY_FQ),
+                            null
+                    );
                 }
                 return returnTypeExpression;
             }
@@ -137,7 +152,7 @@ public class MigrateTaskPropertiesToProviderApiRecipe extends Recipe {
                 if (type == null) {
                     return null;
                 }
-                return type.withReturnType(JavaType.buildType(PROPERTY_NAME));
+                return type.withReturnType(PROPERTY_TYPE);
             }
         };
     }
