@@ -30,37 +30,48 @@ class GroovyMigrateToProviderApiToRecipeTest: GroovyRecipeTest {
     override val recipe: Recipe
         get() = MigrateToProviderApiRecipe()
 
+    private val testTaskDeclaration = """
+        class TestTask {
+            private final Property<String> property = null
+
+            @Input
+            Property<String> getProperty() {
+                return property
+            }
+        }
+    """
+
     @Test
     fun `replace input plain type with the Provider API`() = assertChanged(
         before = """
 // TODO FIX IMPORTS
-// import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
+// import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 
 class TestTask {
-    private String property;
+    private String property
 
     @Input
-    public String getProperty() {
-        return property;
+    String getProperty() {
+        return property
     }
 
-    public void setProperty(String value) {
-        this.property = value;
+    void setProperty(String value) {
+        this.property = value
     }
 }
         """,
         after = """
 // TODO FIX IMPORTS
-// import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
+// import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 
 class TestTask {
-    private final Property<String> property;
+    private final Property<String> property
 
     @Input
-    public Property<String> getProperty() {
-        return property;
+    Property<String> getProperty() {
+        return property
     }
 }
         """
@@ -69,40 +80,72 @@ class TestTask {
     @Test
     fun `replace setProperty with property$set invocations`() = assertChanged(
         before = """
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 
-class TestTask {
-    private final Property<String> property = null;
+$testTaskDeclaration
 
-    @Input
-    public Property<String> getProperty() {
-        return property;
-    }
-}
 class TestPlugin {
-    public void apply() {
-        TestTask task = new TestTask();
-        task.setProperty("Demo value");
+    void apply() {
+        TestTask task = new TestTask()
+        task.setProperty("Demo value")
     }
 }
         """,
         after = """
-import org.gradle.api.provider.Property;
-import org.gradle.api.tasks.Input;
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 
-class TestTask {
-    private final Property<String> property = null;
+$testTaskDeclaration
 
-    @Input
-    public Property<String> getProperty() {
-        return property;
+class TestPlugin {
+    void apply() {
+        TestTask task = new TestTask()
+        task.property.set("Demo value")
     }
 }
+        """
+    )
+
+    @Test
+    fun `replace setProperty with property$set invocations for action`() = assertChanged(
+        before = """
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.Action
+
+$testTaskDeclaration
+
 class TestPlugin {
-    public void apply() {
-        TestTask task = new TestTask();
-        task.property.set("Demo value");
+
+    def <T> T register(String name, Class<T> type, Action<? super T> configurationAction) {
+        return null
+    }
+
+    void apply() {
+        register("testTask", TestTask) { TestTask it ->
+            it.setProperty("Demo value")
+        }
+    }
+}
+        """,
+        after = """
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.Action
+
+$testTaskDeclaration
+
+class TestPlugin {
+
+    def <T> T register(String name, Class<T> type, Action<? super T> configurationAction) {
+        return null
+    }
+
+    void apply() {
+        register("testTask", TestTask) { TestTask it ->
+            it.property.set("Demo value")
+        }
     }
 }
         """
