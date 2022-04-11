@@ -19,7 +19,6 @@ import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
 import org.openrewrite.Tree;
 import org.openrewrite.TreeVisitor;
-import org.openrewrite.groovy.GroovyVisitor;
 import org.openrewrite.internal.lang.Nullable;
 import org.openrewrite.java.JavaVisitor;
 import org.openrewrite.java.tree.J;
@@ -53,7 +52,7 @@ public class MigrateTaskPropertiesToProviderApiRecipe extends Recipe {
             @Override
             public J.ClassDeclaration visitClassDeclaration(J.ClassDeclaration classDecl, ExecutionContext executionContext) {
                 classDecl = (J.ClassDeclaration) super.visitClassDeclaration(classDecl, executionContext);
-                // Remove setters
+                // Remove setters and transform plain properties' declaration to Property API
                 List<Statement> statements = classDecl.getBody().getStatements()
                         .stream()
                         .filter(statement -> !isSetterForPlainProperty(statement, executionContext))
