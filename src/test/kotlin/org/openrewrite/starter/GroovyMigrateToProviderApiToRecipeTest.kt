@@ -150,4 +150,48 @@ class TestPlugin {
 }
         """
     )
+
+    @Test
+    fun `replace setProperty with property$set invocations for closure delegate`() = assertChanged(
+        before = """
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.Action
+
+$testTaskDeclaration
+
+class TestPlugin {
+
+    def <T extends TestTask> T register(String name, Class<T> type, @DelegatesTo(value = TestTask.class, strategy = Closure.DELEGATE_FIRST) Closure configurationAction) {
+        return null
+    }
+
+    void apply() {
+        register("testTask", TestTask) {
+            it.setProperty("Demo value")
+        }
+    }
+}
+        """,
+        after = """
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.Action
+
+$testTaskDeclaration
+
+class TestPlugin {
+
+    def <T extends TestTask> T register(String name, Class<T> type, @DelegatesTo(value = TestTask.class, strategy = Closure.DELEGATE_FIRST) Closure configurationAction) {
+        return null
+    }
+
+    void apply() {
+        register("testTask", TestTask) {
+            it.property.set("Demo value")
+        }
+    }
+}
+        """
+    )
 }
