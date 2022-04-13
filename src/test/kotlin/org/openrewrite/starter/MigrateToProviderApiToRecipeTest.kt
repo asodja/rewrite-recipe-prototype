@@ -24,7 +24,7 @@ class MigrateToProviderApiToRecipeTest: JavaRecipeTest {
     override val parser: JavaParser
         get() = JavaParser.fromJavaVersion()
             .logCompilationWarningsAndErrors(true)
-            .classpath("rewrite-gradle")
+            .classpath("gradle-api")
             .build()
 
     override val recipe: Recipe

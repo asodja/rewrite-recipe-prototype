@@ -24,7 +24,7 @@ class GroovyMigrateToProviderApiToRecipeTest: GroovyRecipeTest {
     override val parser: GroovyParser
         get() = GroovyParser.builder()
             .logCompilationWarningsAndErrors(true)
-            .classpath("rewrite-gradle")
+            .classpath("gradle-api")
             .build()
 
     override val recipe: Recipe
