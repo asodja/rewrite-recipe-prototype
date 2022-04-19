@@ -110,40 +110,34 @@ class TestPlugin {
     @Test
     fun `replace setProperty with property$set invocations for action`() = assertChanged(
         before = """
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.Action
 
 $testTaskDeclaration
 
-class TestPlugin {
-
-    def <T> T register(String name, Class<T> type, Action<? super T> configurationAction) {
-        return null
-    }
-
-    void apply() {
-        register("testTask", TestTask) { TestTask it ->
+class TestPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        project.tasks.register("testTask", TestTask) {
             it.setProperty("Demo value")
         }
     }
 }
         """,
         after = """
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.Action
 
 $testTaskDeclaration
 
-class TestPlugin {
-
-    def <T> T register(String name, Class<T> type, Action<? super T> configurationAction) {
-        return null
-    }
-
-    void apply() {
-        register("testTask", TestTask) { TestTask it ->
+class TestPlugin implements Plugin<Project> {
+    void apply(Project project) {
+        project.tasks.register("testTask", TestTask) {
             it.property.set("Demo value")
         }
     }
@@ -162,7 +156,7 @@ $testTaskDeclaration
 
 class TestPlugin {
 
-    def <T extends TestTask> T register(String name, Class<T> type, @DelegatesTo(value = TestTask.class, strategy = Closure.DELEGATE_FIRST) Closure configurationAction) {
+    def <T extends TestTask> T register(String name, Class<T> type, Closure configurationAction) {
         return null
     }
 
@@ -182,7 +176,7 @@ $testTaskDeclaration
 
 class TestPlugin {
 
-    def <T extends TestTask> T register(String name, Class<T> type, @DelegatesTo(value = TestTask.class, strategy = Closure.DELEGATE_FIRST) Closure configurationAction) {
+    def <T extends TestTask> T register(String name, Class<T> type, Closure configurationAction) {
         return null
     }
 
